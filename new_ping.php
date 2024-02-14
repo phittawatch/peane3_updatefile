@@ -6,8 +6,8 @@ include 'connect.php';
 try {
     // Function to check if a server is up or down using ping
     function isServerUp($ip) {
-        exec(sprintf('ping -c 1 -W 1 %s', escapeshellarg($ip)), $output, $status);
-        return $status === 0; // Ping successful if status code is 0
+        $pingResult = exec("ping -c 1 -W 1 $ip", $output, $result);
+        return $result === 0; // Returns true if ping was successful, false otherwise
     }
 
     // Query to retrieve specific columns from the place_ne3 table
