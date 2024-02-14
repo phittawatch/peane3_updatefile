@@ -1,4 +1,6 @@
 <?php
+set_time_limit(0); // Set the maximum execution time to unlimited
+
 include 'connect.php';
 
 try {
@@ -7,23 +9,16 @@ try {
         $url = "http://{$ip}";
 
         $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5); // Set connection timeout to 5 seconds
-        curl_setopt($ch, CURLOPT_TIMEOUT, 5); // Set overall timeout to 5 seconds
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 1); // Set a short connection timeout
+        curl_setopt($ch, CURLOPT_TIMEOUT, 1); // Set a short overall timeout
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_NOBODY, true); // Send a HEAD request
-        
-        // Execute the cURL request
         $response = curl_exec($ch);
+
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        
-        // Check for errors and timeouts
-        if ($response === false || $httpCode !== 200) {
-            // Mark server as 'Down' if there's an error or timeout
-            return false;
-        }
 
         curl_close($ch);
-        return true; // Server is up
+
+        return $httpCode == 200; // You can adjust the condition based on your server's response
     }
 
     // Query to retrieve specific columns from the place_ne3 table
@@ -42,47 +37,40 @@ try {
     $updateQuery->bindParam(':status', $status, PDO::PARAM_STR);
 
     foreach ($rows as $row) {
+        // Check the status of each server
+        $dellStatus = isServerUp($row['dell_ip']);
+        $riujieStatus = isServerUp($row['riujie_ip']);
+        $watchguardStatus = isServerUp($row['watchguard_ip']);
+        $zerotrustStatus = isServerUp($row['zerotrust_ip']);
+        $fortigateStatus = isServerUp($row['fortigate_ip']);
+
         // Update records for each device
         $namePlaceDevice = $row['name_place'];
 
-        try {
-            // Check the status of each server
-            $dellStatus = isServerUp($row['dell_ip']);
-            $riujieStatus = isServerUp($row['riujie_ip']);
-            $watchguardStatus = isServerUp($row['watchguard_ip']);
-            $zerotrustStatus = isServerUp($row['zerotrust_ip']);
-            $fortigateStatus = isServerUp($row['fortigate_ip']);
+        // Dell Device
+        $deviceName = $row['dell_name'];
+        $status = $dellStatus ? 'Up' : 'Down';
+        $updateQuery->execute();
 
-            // Dell Device
-            $deviceName = $row['dell_name'];
-            $status = $dellStatus ? 'Up' : 'Down';
-            $updateQuery->execute();
+        // Riujie Device
+        $deviceName = $row['riujie_name'];
+        $status = $riujieStatus ? 'Up' : 'Down';
+        $updateQuery->execute();
 
-            // Riujie Device
-            $deviceName = $row['riujie_name'];
-            $status = $riujieStatus ? 'Up' : 'Down';
-            $updateQuery->execute();
+        // Watchguard Device
+        $deviceName = $row['watchguard_name'];
+        $status = $watchguardStatus ? 'Up' : 'Down';
+        $updateQuery->execute();
 
-            // Watchguard Device
-            $deviceName = $row['watchguard_name'];
-            $status = $watchguardStatus ? 'Up' : 'Down';
-            $updateQuery->execute();
+        // Zerotrust Device
+        $deviceName = $row['zerotrust_name'];
+        $status = $zerotrustStatus ? 'Up' : 'Down';
+        $updateQuery->execute();
 
-            // Zerotrust Device
-            $deviceName = $row['zerotrust_name'];
-            $status = $zerotrustStatus ? 'Up' : 'Down';
-            $updateQuery->execute();
-
-            // Fortigate Device
-            $deviceName = $row['fortigate_name'];
-            $status = $fortigateStatus ? 'Up' : 'Down';
-            $updateQuery->execute();
-        } catch (Exception $e) {
-            // Handle individual timeouts or errors
-            // Log the error message or perform other actions if necessary
-            // For now, we continue to the next iteration of the loop
-            continue;
-        }
+        // Fortigate Device
+        $deviceName = $row['fortigate_name'];
+        $status = $fortigateStatus ? 'Up' : 'Down';
+        $updateQuery->execute();
     }
 
     // Commit the transaction
@@ -102,3 +90,25 @@ try {
     echo "Error: " . $e->getMessage();
 }
 ?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="refresh" content="300"> <!-- Refresh every 300 seconds (adjust as needed) -->
+    <title>กรุณาอย่าปิดแท็บนี้เด็ดขาด</title>
+    <h>Ping Update Successfully</h>
+</head>
+<body>
+
+<!-- Your HTML content goes here -->
+
+<script>
+    // Reload the page after a specified interval (in milliseconds)
+    setTimeout(function() {
+        location.reload();
+    }, 10800000); // 300,000 milliseconds = 300 seconds = 5 minutes (adjust as needed)
+</script>
+
+</body>
+</html>
