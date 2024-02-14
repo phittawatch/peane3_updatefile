@@ -4,22 +4,21 @@ function isSwitchUp($ip) {
 
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 1); // Set a short connection timeout
-    curl_setopt($ch, CURLOPT_TIMEOUT_MS, 3000); // Set a maximum overall timeout in milliseconds (adjust as needed)
+    curl_setopt($ch, CURLOPT_TIMEOUT, 3); // Set a maximum overall timeout in seconds (adjust as needed)
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
-    try {
-        $response = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $errorCode = curl_errno($ch);
 
-        if ($httpCode != 200) {
-            // If the HTTP status code is not 200, consider the switch as down
-            return false;
-        }
-    } catch (Exception $e) {
-        // If an exception occurs (e.g., maximum execution time exceeded), consider the switch as down
+    curl_close($ch);
+
+    if ($errorCode === CURLE_OPERATION_TIMEDOUT) {
+        // If the request timed out, consider the switch as down
         return false;
-    } finally {
-        curl_close($ch);
+    } elseif ($httpCode != 200) {
+        // If the HTTP status code is not 200, consider the switch as down
+        return false;
     }
 
     return true;
