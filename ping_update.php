@@ -41,40 +41,47 @@ try {
     $updateQuery->bindParam(':status', $status, PDO::PARAM_STR);
 
     foreach ($rows as $row) {
-        // Check the status of each server
-        $dellStatus = isServerUp($row['dell_ip']);
-        $riujieStatus = isServerUp($row['riujie_ip']);
-        $watchguardStatus = isServerUp($row['watchguard_ip']);
-        $zerotrustStatus = isServerUp($row['zerotrust_ip']);
-        $fortigateStatus = isServerUp($row['fortigate_ip']);
-
         // Update records for each device
         $namePlaceDevice = $row['name_place'];
 
-        // Dell Device
-        $deviceName = $row['dell_name'];
-        $status = $dellStatus ? 'Up' : 'Down';
-        $updateQuery->execute();
+        try {
+            // Check the status of each server
+            $dellStatus = isServerUp($row['dell_ip']);
+            $riujieStatus = isServerUp($row['riujie_ip']);
+            $watchguardStatus = isServerUp($row['watchguard_ip']);
+            $zerotrustStatus = isServerUp($row['zerotrust_ip']);
+            $fortigateStatus = isServerUp($row['fortigate_ip']);
 
-        // Riujie Device
-        $deviceName = $row['riujie_name'];
-        $status = $riujieStatus ? 'Up' : 'Down';
-        $updateQuery->execute();
+            // Dell Device
+            $deviceName = $row['dell_name'];
+            $status = $dellStatus ? 'Up' : 'Down';
+            $updateQuery->execute();
 
-        // Watchguard Device
-        $deviceName = $row['watchguard_name'];
-        $status = $watchguardStatus ? 'Up' : 'Down';
-        $updateQuery->execute();
+            // Riujie Device
+            $deviceName = $row['riujie_name'];
+            $status = $riujieStatus ? 'Up' : 'Down';
+            $updateQuery->execute();
 
-        // Zerotrust Device
-        $deviceName = $row['zerotrust_name'];
-        $status = $zerotrustStatus ? 'Up' : 'Down';
-        $updateQuery->execute();
+            // Watchguard Device
+            $deviceName = $row['watchguard_name'];
+            $status = $watchguardStatus ? 'Up' : 'Down';
+            $updateQuery->execute();
 
-        // Fortigate Device
-        $deviceName = $row['fortigate_name'];
-        $status = $fortigateStatus ? 'Up' : 'Down';
-        $updateQuery->execute();
+            // Zerotrust Device
+            $deviceName = $row['zerotrust_name'];
+            $status = $zerotrustStatus ? 'Up' : 'Down';
+            $updateQuery->execute();
+
+            // Fortigate Device
+            $deviceName = $row['fortigate_name'];
+            $status = $fortigateStatus ? 'Up' : 'Down';
+            $updateQuery->execute();
+        } catch (Exception $e) {
+            // Handle individual timeouts or errors
+            // Log the error message or perform other actions if necessary
+            // For now, we continue to the next iteration of the loop
+            continue;
+        }
     }
 
     // Commit the transaction
@@ -94,25 +101,3 @@ try {
     echo "Error: " . $e->getMessage();
 }
 ?>
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="refresh" content="300"> <!-- Refresh every 300 seconds (adjust as needed) -->
-    <title>กรุณาอย่าปิดแท็บนี้เด็ดขาด</title>
-    <h>Ping Update Successfully!</h>
-</head>
-<body>
-
-<!-- Your HTML content goes here -->
-
-<script>
-    // Reload the page after a specified interval (in milliseconds)
-    setTimeout(function() {
-        location.reload();
-    }, 10800000); // 300,000 milliseconds = 300 seconds = 5 minutes (adjust as needed)
-</script>
-
-</body>
-</html>
