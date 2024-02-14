@@ -4,7 +4,7 @@ function isSwitchUp($ip) {
 
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 1); // Set a short connection timeout
-    curl_setopt($ch, CURLOPT_TIMEOUT, 3); // Set a maximum overall timeout (adjust as needed)
+    curl_setopt($ch, CURLOPT_TIMEOUT_MS, 3000); // Set a maximum overall timeout in milliseconds (adjust as needed)
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
     try {
