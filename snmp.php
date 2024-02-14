@@ -4,7 +4,7 @@ include 'connect.php';
 try {
     // Function to check if a switch is up or down using SNMP
     function isSwitchUp($ip, $community) {
-        $session = new SNMP(SNMP::VERSION_2C, $ip, $community);
+        $session = new SNMP(SNMP::VERSION_2C, $ip, $community, 1000000); // Increase timeout to 1 second
         $response = $session->get('SNMPv2-MIB::sysUpTime.0');
 
         return $response !== false; // You can adjust the condition based on the response
@@ -85,19 +85,12 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="refresh" content="300"> <!-- Refresh every 300 seconds (adjust as needed) -->
-    <title>กรุณาอย่าปิดแท็บนี้เด็ดขาด</title>
-    <h>Ping Update Successfully</h>
+    <title>Switch Status Update</title>
+    <h1>Switch Status Update Successfully</h1>
 </head>
 <body>
 
 <!-- Your HTML content goes here -->
-
-<script>
-    // Reload the page after a specified interval (in milliseconds)
-    setTimeout(function() {
-        location.reload();
-    }, 10800000); // 300,000 milliseconds = 300 seconds = 5 minutes (adjust as needed)
-</script>
 
 </body>
 </html>
