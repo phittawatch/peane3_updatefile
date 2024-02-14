@@ -10,6 +10,7 @@ try {
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5); // Set connection timeout to 5 seconds
         curl_setopt($ch, CURLOPT_TIMEOUT, 5); // Set overall timeout to 5 seconds
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_NOBODY, true); // Send a HEAD request
         
         // Execute the cURL request
         $response = curl_exec($ch);
