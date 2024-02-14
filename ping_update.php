@@ -8,27 +8,21 @@ try {
 
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5); // Set connection timeout to 5 seconds
-        curl_setopt($ch, CURLOPT_TIMEOUT, 10); // Set overall timeout to 10 seconds
+        curl_setopt($ch, CURLOPT_TIMEOUT, 5); // Set overall timeout to 5 seconds
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        
+        // Execute the cURL request
         $response = curl_exec($ch);
-
-        if ($response === false) {
-            // Handle cURL error
-            $error = curl_error($ch);
-            curl_close($ch);
-            throw new Exception("cURL error: $error");
-        }
-
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        
+        // Check for errors and timeouts
+        if ($response === false || $httpCode !== 200) {
+            // Mark server as 'Down' if there's an error or timeout
+            return false;
+        }
 
         curl_close($ch);
-
-        if ($httpCode !== 200) {
-            // Handle non-200 HTTP status code
-            throw new Exception("HTTP error: $httpCode");
-        }
-
-        return true; // Return true if the server is up
+        return true; // Server is up
     }
 
     // Query to retrieve specific columns from the place_ne3 table
@@ -48,21 +42,11 @@ try {
 
     foreach ($rows as $row) {
         // Check the status of each server
-        try {
-            $dellStatus = isServerUp($row['dell_ip']);
-            $riujieStatus = isServerUp($row['riujie_ip']);
-            $watchguardStatus = isServerUp($row['watchguard_ip']);
-            $zerotrustStatus = isServerUp($row['zerotrust_ip']);
-            $fortigateStatus = isServerUp($row['fortigate_ip']);
-        } catch (Exception $e) {
-            // Log the error and set status to 'Down' if there's an error with cURL
-            error_log("Error checking server status: " . $e->getMessage(), 0);
-            $dellStatus = false;
-            $riujieStatus = false;
-            $watchguardStatus = false;
-            $zerotrustStatus = false;
-            $fortigateStatus = false;
-        }
+        $dellStatus = isServerUp($row['dell_ip']);
+        $riujieStatus = isServerUp($row['riujie_ip']);
+        $watchguardStatus = isServerUp($row['watchguard_ip']);
+        $zerotrustStatus = isServerUp($row['zerotrust_ip']);
+        $fortigateStatus = isServerUp($row['fortigate_ip']);
 
         // Update records for each device
         $namePlaceDevice = $row['name_place'];
@@ -110,3 +94,25 @@ try {
     echo "Error: " . $e->getMessage();
 }
 ?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="refresh" content="300"> <!-- Refresh every 300 seconds (adjust as needed) -->
+    <title>กรุณาอย่าปิดแท็บนี้เด็ดขาด</title>
+    <h>Ping Update Successfully!</h>
+</head>
+<body>
+
+<!-- Your HTML content goes here -->
+
+<script>
+    // Reload the page after a specified interval (in milliseconds)
+    setTimeout(function() {
+        location.reload();
+    }, 10800000); // 300,000 milliseconds = 300 seconds = 5 minutes (adjust as needed)
+</script>
+
+</body>
+</html>
