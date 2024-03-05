@@ -6,10 +6,10 @@ $ipAddress = '172.22.217.241';
 $community = 'public';
 
 // SNMP OID for system uptime
-$sysUpTimeOID = 'SNMPv2-MIB::sysUpTime.0';
+$sysUpTimeOID = '.1.3.6.1.2.1.1.3.0';
 
 // SNMP OID for system description
-$sysDescrOID = 'SNMPv2-MIB::sysDescr.0';
+$sysDescrOID = '.1.3.6.1.2.1.1.1.0';
 
 // Create SNMP session
 $session = new SNMP(SNMP::VERSION_2C, $ipAddress, $community);
