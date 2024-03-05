@@ -1,96 +1,49 @@
 <?php
-include 'connect.php';
+// SNMP community string (default is "public")
+$community = "public";
 
-try {
-    // Function to check if a switch is up or down using SNMP
-    function isSwitchUp($ip, $community) {
-        $session = new SNMP(SNMP::VERSION_2C, $ip, $community, 1000000); // Increase timeout to 1 second
-        $response = $session->get('SNMPv2-MIB::sysUpTime.0');
+// IP address of the switch
+$switch_ip = "172.22.217.241";
 
-        return $response !== false; // You can adjust the condition based on the response
-    }
+// SNMP OID for system description (sysDescr)
+$oid_sys_descr = "1.3.6.1.2.1.1.1.0"; // Numeric OID for sysDescr
 
-    // Query to retrieve specific columns from the place_ne3 table
-    $sql = "SELECT name_place, dell_name, dell_ip, riujie_name, riujie_ip, watchguard_name, watchguard_ip, zerotrust_name, zerotrust_ip, fortigate_name, fortigate_ip FROM place_ne3";
-    $query = $conn->prepare($sql);
-    $query->execute();
-    $rows = $query->fetchAll(PDO::FETCH_ASSOC);
+// SNMP OID for system uptime
+$oid_sys_uptime = "1.3.6.1.2.1.1.3.0"; // OID for sysUpTime
 
-    // Prepare for the update
-    $updateSql = "UPDATE ping_results SET status = :status, timestamp = CURRENT_TIMESTAMP WHERE name_place_device = :name_place_device AND device_name = :device_name";
-    $updateQuery = $conn->prepare($updateSql);
+// Interval between SNMP queries (in seconds)
+$interval = 5; // adjust as needed
 
-    // Bind parameters outside the loop
-    $updateQuery->bindParam(':name_place_device', $namePlaceDevice, PDO::PARAM_STR);
-    $updateQuery->bindParam(':device_name', $deviceName, PDO::PARAM_STR);
-    $updateQuery->bindParam(':status', $status, PDO::PARAM_STR);
+while (true) {
+    // Create an SNMP session
+    $session = new SNMP(SNMP::VERSION_2C, $switch_ip, $community);
 
-    foreach ($rows as $row) {
-        // Check the status of each switch
-        $dellStatus = isSwitchUp($row['dell_ip'], 'public');
-        $riujieStatus = isSwitchUp($row['riujie_ip'], 'public');
-        $watchguardStatus = isSwitchUp($row['watchguard_ip'], 'public');
-        $zerotrustStatus = isSwitchUp($row['zerotrust_ip'], 'public');
-        $fortigateStatus = isSwitchUp($row['fortigate_ip'], 'public');
+    // Get the system description
+    $sys_descr = $session->get($oid_sys_descr);
 
-        // Update records for each device
-        $namePlaceDevice = $row['name_place'];
+    // Get the system uptime
+    $sys_uptime = $session->get($oid_sys_uptime);
 
-        // Dell Device
-        $deviceName = $row['dell_name'];
-        $status = $dellStatus ? 'Up' : 'Down';
-        $updateQuery->execute();
+    // Close the SNMP session
+    $session->close();
 
-        // Riujie Device
-        $deviceName = $row['riujie_name'];
-        $status = $riujieStatus ? 'Up' : 'Down';
-        $updateQuery->execute();
+    // Display the results
+    echo "Switch IP: " . $switch_ip . "<br>";
+    echo "System Description: " . $sys_descr . "<br>";
+    echo "System Uptime: " . formatUptime($sys_uptime) . "<br>"; // Format uptime
+    echo "<hr>";
 
-        // Watchguard Device
-        $deviceName = $row['watchguard_name'];
-        $status = $watchguardStatus ? 'Up' : 'Down';
-        $updateQuery->execute();
+    // Wait for the specified interval before the next SNMP query
+    sleep($interval);
+}
 
-        // Zerotrust Device
-        $deviceName = $row['zerotrust_name'];
-        $status = $zerotrustStatus ? 'Up' : 'Down';
-        $updateQuery->execute();
-
-        // Fortigate Device
-        $deviceName = $row['fortigate_name'];
-        $status = $fortigateStatus ? 'Up' : 'Down';
-        $updateQuery->execute();
-    }
-
-    // Commit the transaction
-    $conn->commit();
-
-    // Log success message
-    error_log("SNMP query and update script ran successfully.", 0);
-} catch (PDOException $e) {
-    // Log the database error message
-    error_log("Database error: " . $e->getMessage(), 0);
-    // Optionally, you can also echo or log the error for debugging purposes
-    echo "Error: " . $e->getMessage();
-} catch (Exception $e) {
-    // Log the general error message
-    error_log("General error: " . $e->getMessage(), 0);
-    // Optionally, you can also echo or log the error for debugging purposes
-    echo "Error: " . $e->getMessage();
+// Function to format uptime in human-readable format
+function formatUptime($uptime) {
+    $uptimeSeconds = intval($uptime) / 100; // Convert uptime to seconds (assuming it's in 1/100th of seconds)
+    $days = floor($uptimeSeconds / (24 * 3600));
+    $hours = floor(($uptimeSeconds % (24 * 3600)) / 3600);
+    $minutes = floor(($uptimeSeconds % 3600) / 60);
+    $seconds = $uptimeSeconds % 60;
+    return "{$days} days, {$hours} hours, {$minutes} minutes, {$seconds} seconds";
 }
 ?>
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="refresh" content="300"> <!-- Refresh every 300 seconds (adjust as needed) -->
-    <title>Switch Status Update</title>
-    <h1>Switch Status Update Successfully</h1>
-</head>
-<body>
-
-<!-- Your HTML content goes here -->
-
-</body>
-</html>
