@@ -1,5 +1,4 @@
-import tkinter as tk
-from tkinter import ttk
+from tkinter import *
 
 def submit():
     # Get the entered ID and password
@@ -11,27 +10,23 @@ def submit():
     print("Entered Password:", entered_password)
 
 # Create the main Tkinter window
-root = tk.Tk()
+root = Tk()
 root.title("Login")
 
-# Create a frame for the login form
-login_frame = ttk.Frame(root, padding="20")
-login_frame.grid(row=0, column=0)
-
 # Create labels and entry fields for ID and password
-id_label = ttk.Label(login_frame, text="ID:")
-id_label.grid(row=0, column=0, sticky="e", padx=5, pady=5)
-id_entry = ttk.Entry(login_frame)
-id_entry.grid(row=0, column=1, padx=5, pady=5)
+id_label = Label(root, text="ID:")
+id_label.grid(row=0, column=0, sticky="e")
+id_entry = Entry(root)
+id_entry.grid(row=0, column=1)
 
-password_label = ttk.Label(login_frame, text="Password:")
-password_label.grid(row=1, column=0, sticky="e", padx=5, pady=5)
-password_entry = ttk.Entry(login_frame, show="*")  # Show * for password entry
-password_entry.grid(row=1, column=1, padx=5, pady=5)
+password_label = Label(root, text="Password:")
+password_label.grid(row=1, column=0, sticky="e")
+password_entry = Entry(root, show="*")  # Show * for password entry
+password_entry.grid(row=1, column=1)
 
 # Create a submit button
-submit_button = ttk.Button(login_frame, text="Submit", command=submit)
-submit_button.grid(row=2, columnspan=2, pady=10)
+submit_button = Button(root, text="Submit", command=submit)
+submit_button.grid(row=2, column=1, pady=10)
 
 # Start the Tkinter event loop
 root.mainloop()
