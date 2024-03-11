@@ -1,0 +1,19 @@
+import tkinter as tk
+from tkinter import filedialog
+
+def choose_directory():
+    directory = filedialog.askdirectory()
+    if directory:
+        print("Selected directory:", directory)
+        # Do something with the selected directory
+
+# Create a tkinter window
+root = tk.Tk()
+root.title("Directory Selection")
+
+# Create a button to choose directory
+choose_button = tk.Button(root, text="Choose Directory", command=choose_directory)
+choose_button.pack(pady=10)
+
+# Run the tkinter event loop
+root.mainloop()
