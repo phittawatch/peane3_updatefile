@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import filedialog, ttk
+from tkinter import filedialog, ttk, messagebox
 import time
 
 def choose_directory():
@@ -9,16 +9,19 @@ def choose_directory():
         directory_entry.insert(0, directory)
 
 def submit():
-    id_value = id_entry.get()
-    password_value = password_entry.get()
-    directory_value = directory_entry.get()
-    print("ID:", id_value)
-    print("Password:", password_value)
-    print("Directory:", directory_value)
-    # Add your submit logic here
-    loading_bar.start(10)  # Start the loading bar
-    submit_button.config(state="disabled")  # Disable the submit button
-    root.after(5000, stop_loading_bar)  # Simulate a delay of 5 seconds, then stop the loading bar
+    confirm = messagebox.askyesno("Confirmation", "กรุณาตรวจสอบรหัสผ่านให้ถูกต้องก่อนกดยืนยัน!")
+    if confirm:
+        print("Submit Success")
+        sap_id = id_entry.get()
+        sap_pw = password_entry.get()
+        directory_value = directory_entry.get()
+        print("ID:", sap_id)
+        print("Password:", sap_pw)
+        print("Directory:", directory_value)
+        submit_button.config(state="disabled")  # Disable the submit button
+    else:
+        print("Cancel")
+    
 
 def stop_loading_bar():
     loading_bar.stop()  # Stop the loading bar
@@ -26,7 +29,8 @@ def stop_loading_bar():
 
 # Create a tkinter window
 root = tk.Tk()
-root.title("Input Form")
+root.title("โปรแกรมดึงข้อมูลอัจฉริยะ")
+root.resizable(False, False)
 
 # Style
 style = ttk.Style()
@@ -58,9 +62,6 @@ directory_entry.grid(row=3, column=1, padx=5, pady=5, sticky="we")
 submit_button = ttk.Button(root, text="Submit", command=submit)
 submit_button.grid(row=4, column=0, columnspan=2, padx=5, pady=5, sticky="we")
 
-# Loading bar
-loading_bar = ttk.Progressbar(root, mode="indeterminate", length=200)
-loading_bar.grid(row=5, column=0, columnspan=2, padx=5, pady=5)
 
 # Run the tkinter event loop
 root.mainloop()
